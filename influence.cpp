@@ -7,6 +7,8 @@
 #include <list>
 #include <queue>
 #include <climits>
+#include <ctime>
+#include <iomanip>
 
 using namespace std;
 
@@ -101,7 +103,7 @@ int Graph::shortestPath2(int src, int T) {
     for (int i = 0; i < V; i++) {
         if (dist[i] <= T) {
             influenced[i] = true;
-            cout << "Node " << i << " was influenced \n";
+            //cout << "Node " << i << " was influenced \n";
         }
     }
     }
@@ -111,7 +113,7 @@ int Graph::shortestPath2(int src, int T) {
     for (int i = 0; i < V; i++) {
         //printf("%d     %f\n", i, dist[i]);
         if (dist[i] <= T && influenced[i] == false && src != i) {
-            cout <<"I was here \n";
+            //cout <<"I was here \n";
             spread++;
         }
     }
@@ -173,6 +175,8 @@ int main(int argc, char const *argv[]) {
     vector<Influencers> array = parser(argv);
     print(array);
 
+    clock_t start1 = clock();
+    
     Graph g(numVertices);
     for (int i = 0; i < array.size(); i++) {
         g.addEdge(array[i].nodeA, array[i].nodeB, array[i].weight);
@@ -189,17 +193,19 @@ int main(int argc, char const *argv[]) {
             spreadTI1 = spread;
         }
     }
+    clock_t end1 = clock();
 
+    clock_t start2 = clock();
     int TI2, temp2, spread2, spreadTI2 = 0;
     temp2 = 0;
-    cout << "node " << TI1 << "\n";
+   // cout << "node " << TI1 << "\n";
     spread2 = g.shortestPath2(TI1, T);
     
-    cout << "Vertex: " << TI1 << " Marginal Spread: " << spread2 << "\n";
+    //cout << "Vertex: " << TI1 << " Marginal Spread: " << spread2 << "\n";
     for (int i = 0; i < TI1; i++) {
-        cout << "node " << i << "\n";
+        //cout << "node " << i << "\n";
         spread2 = g.shortestPath2(i, T);
-        cout << "Vertex: " << i << " Marginal Spread: " << spread2 << "\n";
+       // cout << "Vertex: " << i << " Marginal Spread: " << spread2 << "\n";
         if (spread2 > spreadTI2) {
             TI2 = i;
             spreadTI2 = spread2;
@@ -208,17 +214,21 @@ int main(int argc, char const *argv[]) {
 
     for (int i = TI1 + 1; i < numVertices - 1; i++) {
         spread2 = g.shortestPath2(i, T);
-        cout << "node " << i << "\n";
-        cout << "Vertex: " << i << " Marginal Spread: " << spread2 << "\n";
+        //cout << "node " << i << "\n";
+        //cout << "Vertex: " << i << " Marginal Spread: " << spread2 << "\n";
         if (spread2 > spreadTI2) {
             TI2 = i;
             spreadTI2 = spread2;
         }
     }
 
-
-    cout << "TOP-1 INFLUENCER: " << TI1 << ", SPREAD: " << spreadTI1 << " TIME: " << "\n";
-    cout << "TOP-2 INFLUENCER: " << TI2 << ", MARGINAL SPREAD: " << spreadTI2 << " TIME: " << "\n";
+    clock_t end2 = clock();
+    cout << "TOP-1 INFLUENCER: " << TI1 << ", SPREAD: " << spreadTI1 
+            << ", TIME: " << std::fixed << std::setprecision(3)
+              << 1000.0 * (end1-start1) / CLOCKS_PER_SEC << " ms\n";
+    cout << "TOP-2 INFLUENCER: " << TI2 << ", MARGINAL SPREAD: " << spreadTI2 
+            << ", TIME: " <<std::fixed << std::setprecision(3)
+              << 1000.0 * (end2-start2) / CLOCKS_PER_SEC << " ms\n";
 
     return 0;
 }
