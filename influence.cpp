@@ -6,9 +6,12 @@
 #include <vector>
 #include <list>
 #include <queue>
-#include <climits>
-#include <ctime>
 #include <iomanip>
+#include <time.h>
+#include <sys/time.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <limits.h>
 
 using namespace std;
 
@@ -112,7 +115,7 @@ int Graph::shortestPath2(int src, int T) {
     int spread = 0;
     for (int i = 0; i < V; i++) {
         //printf("%d     %f\n", i, dist[i]);
-        if (dist[i] <= T && influenced[i] == false && src != i) {
+        if (dist[i] <= T && influenced[i] == false) {
             //cout <<"I was here \n";
             spread++;
         }
@@ -172,12 +175,13 @@ vector<Influencers> parser(char const *filename[]) {
 }
 
 int main(int argc, char const *argv[]) {
+
     vector<Influencers> array = parser(argv);
     print(array);
-
-    clock_t start1 = clock();
-    
-    Graph g(numVertices);
+	struct timeval begin, end;
+	
+	gettimeofday(&begin, NULL);
+	Graph g(numVertices);
     for (int i = 0; i < array.size(); i++) {
         g.addEdge(array[i].nodeA, array[i].nodeB, array[i].weight);
     }
@@ -186,24 +190,28 @@ int main(int argc, char const *argv[]) {
 
     int temp, spread, spreadTI1 = 0;
     temp = 0;
-    for (int i = 0; i < numVertices - 1; i++) {
+    for (int i = 0; i < numVertices; i++) {
         spread = g.shortestPath(i, T);
         if (spread > spreadTI1) {
             TI1 = i;
             spreadTI1 = spread;
         }
     }
-    clock_t end1 = clock();
-
-    clock_t start2 = clock();
-    int TI2, temp2, spread2, spreadTI2 = 0;
+	gettimeofday(&end, NULL);
+    
+	double elapsed = ((end.tv_sec - begin.tv_sec)*1000.0)+((end.tv_usec - begin.tv_usec)/1000.0);
+  	cout << "TOP-1 INFLUENCER: " << TI1 << ", SPREAD: " << spreadTI1 
+            << ", TIME: " << elapsed << " ms\n";
+	
+	gettimeofday(&begin, NULL);
+	int TI2, temp2, spread2, spreadTI2 = 0;
     temp2 = 0;
-   // cout << "node " << TI1 << "\n";
+    //cout << "node " << TI1 << "\n";
     spread2 = g.shortestPath2(TI1, T);
     
     //cout << "Vertex: " << TI1 << " Marginal Spread: " << spread2 << "\n";
     for (int i = 0; i < TI1; i++) {
-        //cout << "node " << i << "\n";
+       // cout << "node " << i << "\n";
         spread2 = g.shortestPath2(i, T);
        // cout << "Vertex: " << i << " Marginal Spread: " << spread2 << "\n";
         if (spread2 > spreadTI2) {
@@ -212,7 +220,7 @@ int main(int argc, char const *argv[]) {
         }
     }
 
-    for (int i = TI1 + 1; i < numVertices - 1; i++) {
+    for (int i = TI1 + 1; i < numVertices; i++) {
         spread2 = g.shortestPath2(i, T);
         //cout << "node " << i << "\n";
         //cout << "Vertex: " << i << " Marginal Spread: " << spread2 << "\n";
@@ -221,14 +229,11 @@ int main(int argc, char const *argv[]) {
             spreadTI2 = spread2;
         }
     }
-
-    clock_t end2 = clock();
-    cout << "TOP-1 INFLUENCER: " << TI1 << ", SPREAD: " << spreadTI1 
-            << ", TIME: " << std::fixed << std::setprecision(3)
-              << 1000.0 * (end1-start1) / CLOCKS_PER_SEC << " ms\n";
+	gettimeofday(&end, NULL);
+    
+	elapsed = ((end.tv_sec - begin.tv_sec)*1000.0)+((end.tv_usec - begin.tv_usec)/1000.0);
     cout << "TOP-2 INFLUENCER: " << TI2 << ", MARGINAL SPREAD: " << spreadTI2 
-            << ", TIME: " <<std::fixed << std::setprecision(3)
-              << 1000.0 * (end2-start2) / CLOCKS_PER_SEC << " ms\n";
+            << ", TIME: " << elapsed << " ms\n";
 
     return 0;
 }
